@@ -13,3 +13,4 @@ def test_kerbin_orbital_velocity():
     result = orbital_velocity(KERBIN, radius)
 
     assert math.isclose(result, expected)
+
