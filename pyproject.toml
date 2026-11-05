@@ -10,12 +10,15 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy",
     "scipy",
-    "matplotlib"
+    "matplotlib",
+    "pandas"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest"
+    "pytest",
+    "jupyterlab",
+    "ipykernel"
 ]
 
 [tool.setuptools.packages.find]
