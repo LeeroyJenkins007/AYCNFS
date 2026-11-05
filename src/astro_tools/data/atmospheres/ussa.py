@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
-EARTH_REF_RADIUS = 6_356_766    # meter
+R_EARTH = 6_356_766             # meter
 REF_G = 9.80665                 # meter / second
+R_SPECIFIC_GAS = 8.31432e3      # N * m / (kmol * K)
 
 @dataclass(frozen=True)
 class AtmosphericLayer:
@@ -22,7 +23,7 @@ class USSA1976:
         AtmosphericLayer(84_852, 0.0, 186.964, 0.0)         # Note that the model stops at 84,852 meters up, so either contiune to use previous layer rates or 0
         )
 
-    def _get_layer(self, altitude: float) -> AtmosphericLayer:
+    def _get_layer(self, altitude: float) -> tuple[AtmosphericLayer, float]:
         """
             Get layer of the U.S. Standard Atmospheric Model 1976.
         
@@ -33,18 +34,20 @@ class USSA1976:
         
             Returns
             -------
-            AtmosphereicLayer
-                The USSA layer that the provided altitude is within.
+            tuple (AtmosphereicLayer, layerNumber)
+                The USSA layer that the provided altitude is within, and the index of that layer.
         """
-        selectedLayer = self.layers[0]
+        layerNum = 0
+        selectedLayer = self.layers[layerNum]
 
-        for layer in self.layers:
+        for idx, layer in enumerate(self.layers):
             if altitude >= layer.base_altitude:
                 selectedLayer = layer
+                layerNum = idx
             else:
                 break
 
-        return selectedLayer
+        return selectedLayer, layerNum
 
     def _geometric_to_geopotential(self, altitude: float) -> float:
         """
@@ -53,16 +56,28 @@ class USSA1976:
             Parameters
             ----------
             altitude : float
-                Geopotential Height [m].
+                Geometric Height (Z) [m].
         
             Returns
             -------
-            AtmosphereicLayer
-                The USSA layer that the provided altitude is within.
+            h : float
+                The Geopotential altitude defined for the USSA1976 [m].
         """
+        return R_EARTH * altitude / (R_EARTH + altitude)
 
     def molecular_scale_temperature(self, altitude: float) -> float:
         h = self._geometric_to_geopotential(altitude)
+        layer, layerNum = self._get_layer(h)
+
+        if layerNum < len(self.layers) - 1:
+            # model is covered
+            temp = (h - layer.base_altitude) * layer.lapse_rate + layer.base_molecular_temperature
+        else:
+            # need to extrapolate up
+            temp = self.layers[-1].base_molecular_temperature
+
+        return temp
+
 
     def temperature(self, altitude: float) -> float:
         ...
