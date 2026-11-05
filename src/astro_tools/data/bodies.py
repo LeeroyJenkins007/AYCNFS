@@ -1,6 +1,8 @@
 from .celestial_body import CelestialBody
 from .ksp_body import KSPBody
 from .atmospheres.exponential import ExponentialAtmosphere
+from astro_tools.data.atmospheres.ussa import USSA1976
+from astro_tools.data.atmospheres.altitude_conversions import kerbin_to_earth_geopotential
 
 
 EARTH = CelestialBody(
@@ -19,10 +21,7 @@ KERBIN = KSPBody(
     radius=600_000,
     mu=3.5316e12,
     rotation_period=21_600,
-    atmosphere=ExponentialAtmosphere(
-        surface_density=1.225,
-        scale_height=8500
-    ),
+    atmosphere=USSA1976(altitude_converter=kerbin_to_earth_geopotential),
     soi=84_159_286,
     atmosphere_cutoff_altitude=70_000
 )
