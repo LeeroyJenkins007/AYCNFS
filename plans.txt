@@ -1,0 +1,109 @@
+Here's the full set of equations you need for a numerical ascent simulation, with Kerbin-specific constants.
+
+## Kerbin Constants
+
+| Symbol | Value |
+|---|---|
+| R (radius) | 600,000 m |
+| μ (GM) | 3.5316 × 10¹² m³/s² |
+| g₀ (surface gravity) | 9.81 m/s² |
+| ρ₀ (sea-level density) | 1.225 kg/m³ |
+| p₀ (sea-level pressure) | 101,325 Pa |
+| H (scale height, simple) | 5,000 m |
+
+## Atmospheric Model
+
+**Simple (pre-1.0, good to ~10% error):**
+
+$$\rho(h) = \rho_0 \, e^{-h/H}$$
+
+**Accurate (KSP 1.0+):** KSP uses the **US Standard Atmosphere** with a height rescaling. Convert KSP geometric altitude *z* to Earth geopotential altitude:
+
+$$h_{\text{Earth}} = \frac{7963.75 \cdot z}{6371} + 1.25 \cdot z$$
+
+Then look up (or compute from the USSA lapse-rate layers) pressure and temperature at that Earth altitude, and get density from the ideal gas law:
+
+$$\rho = \frac{p \cdot M}{R_{\text{gas}} \cdot T}$$
+
+where M = 0.0289644 kg/mol and R_gas = 8.31446 J/(mol·K).
+
+A quick approximation that works well across the full column:
+
+$$\rho(h) \approx \frac{p(h)}{82843.125} \quad \text{where} \quad p(h) = 101325 \cdot e^{-h/5000} \;\text{Pa}$$
+
+## Equations of Motion (Flight-Path Frame)
+
+You integrate these numerically (RK4 or even Euler-Cromer with small dt):
+
+$$\frac{dv}{dt} = \frac{T}{m} - \frac{D}{m} - g(h)\,\sin\gamma$$
+
+$$\frac{d\gamma}{dt} = -\frac{g(h)}{v}\cos\gamma + \frac{v}{R+h}\cos\gamma \quad \text{(gravity turn)}$$
+
+$$\frac{dh}{dt} = v \sin\gamma$$
+
+$$\frac{dm}{dt} = -\dot{m} \quad \text{(while engine is on)}$$
+
+where γ is the **flight path angle from horizontal** (γ = 90° at liftoff, γ → 0° at orbit).
+
+## Force Terms
+
+**Thrust:**
+$$T = \dot{m} \cdot v_e = \dot{m} \cdot I_{sp} \cdot g_0$$
+
+**Drag:**
+$$D = \tfrac{1}{2}\,\rho(h)\,v^2\,C_D\,A$$
+
+- C_D ≈ 0.3–0.5 for a typical KSP rocket (nose cone helps)
+- A = max cross-sectional area (m²)
+
+**Gravity:**
+$$g(h) = \frac{\mu}{(R+h)^2}$$
+
+## Extracting Losses from the Simulation
+
+Once you have the full trajectory, the losses are:
+
+$$\Delta v_{\text{grav}} = \int_0^{t_b} g(h)\,\sin\gamma \; dt$$
+
+$$\Delta v_{\text{drag}} = \int_0^{t_b} \frac{D(t)}{m(t)} \; dt$$
+
+And the total velocity gained:
+
+$$\Delta v_{\text{total}} = v_{\text{final}} = I_{sp}\,g_0\,\ln\frac{m_0}{m_f} - \Delta v_{\text{grav}} - \Delta v_{\text{drag}}$$
+
+## Simulation Pseudocode
+
+```
+dt = 0.1 s  (or smaller for accuracy)
+h = 0; v = 0; γ = π/2; m = m_wet
+
+for t in 0..t_burn:
+    g  = μ / (R + h)²
+    ρ  = ρ₀ * exp(-h / 5000)          # or USSA lookup
+    D  = 0.5 * ρ * v² * Cd * A
+    T  = mdot * Isp * g0              # 0 if engine off
+    dm/dt = -mdot                      # 0 if engine off
+
+    dv  = (T - D)/m - g*sin(γ)
+    dγ  = -(g/v)*cos(γ) + (v/(R+h))*cos(γ)
+    dh  = v * sin(γ)
+
+    v += dv * dt
+    γ += dγ * dt
+    h += dh * dt
+    m += (dm/dt) * dt
+
+    # accumulate losses
+    v_grav_loss += g * sin(γ) * dt
+    v_drag_loss += (D/m) * dt
+```
+
+## Practical Notes for KSP
+
+- **KSP's drag model** actually uses a more complex formula that includes a Mach-dependent drag coefficient and a "lift" term for asymmetric shapes. The simple ½ρv²C_D·A is a good first approximation.
+- **Max-q** (peak dynamic pressure q = ½ρv²) typically hits around 8–12 km altitude in KSP. Your simulation will show this naturally.
+- **Gravity turn rate**: In KSP, the standard "pitch to 45° at 1 km, 90° at 70 km" style turn is roughly what the gravity turn equation produces for TWR ~1.5. You can also just fix γ as a function of altitude (e.g., γ = 90° - 45°·(h/70000)) to mimic a manual turn profile.
+- **Orbit insertion**: Once you're above ~70 km (ρ ≈ 0), you just need to burn prograde until v = √(μ/(R+h_target)) for a circular orbit. That final burn is pure Tsiolkovsky with no losses.
+
+This gives you a fully self-contained simulator — no delta-v maps needed. You just feed in your rocket's mass, Isp, thrust, C_D, and A, and it tells you exactly where you end up.
+
