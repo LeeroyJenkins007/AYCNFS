@@ -12,24 +12,7 @@ Here's the full set of equations you need for a numerical ascent simulation, wit
 | H (scale height, simple) | 5,000 m |
 
 ## Atmospheric Model
-
-**Simple (pre-1.0, good to ~10% error):**
-
-$$\rho(h) = \rho_0 \, e^{-h/H}$$
-
-**Accurate (KSP 1.0+):** KSP uses the **US Standard Atmosphere** with a height rescaling. Convert KSP geometric altitude *z* to Earth geopotential altitude:
-
-$$h_{\text{Earth}} = \frac{7963.75 \cdot z}{6371} + 1.25 \cdot z$$
-
-Then look up (or compute from the USSA lapse-rate layers) pressure and temperature at that Earth altitude, and get density from the ideal gas law:
-
-$$\rho = \frac{p \cdot M}{R_{\text{gas}} \cdot T}$$
-
-where M = 0.0289644 kg/mol and R_gas = 8.31446 J/(mol·K).
-
-A quick approximation that works well across the full column:
-
-$$\rho(h) \approx \frac{p(h)}{82843.125} \quad \text{where} \quad p(h) = 101325 \cdot e^{-h/5000} \;\text{Pa}$$
+DONE
 
 ## Equations of Motion (Flight-Path Frame)
 
