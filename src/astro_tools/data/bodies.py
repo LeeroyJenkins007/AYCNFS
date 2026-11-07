@@ -4,16 +4,25 @@ from .atmospheres.exponential import ExponentialAtmosphere
 from astro_tools.data.atmospheres.ussa import USSA1976
 from astro_tools.data.atmospheres.altitude_conversions import kerbin_to_earth_geopotential
 
+SECONDS_PER_DAY = 86400
 
 EARTH = CelestialBody(
     name="Earth",
     radius=6_371_000,
-    mu=3.986004418e14,
+    mass=5.974e24,
     rotation_period=86164.0905,
     atmosphere=ExponentialAtmosphere(
         surface_density=1.255, 
         scale_height=8500
         )
+)
+
+MOON = CelestialBody(
+    name="Moon",
+    radius=1_737_000,
+    mass=73.48e21,
+    rotation_period=27.32 * SECONDS_PER_DAY,
+    atmosphere=None
 )
 
 KERBIN = KSPBody(
