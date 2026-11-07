@@ -28,7 +28,7 @@ MOON = CelestialBody(
 KERBIN = KSPBody(
     name="Kerbin",
     radius=600_000,
-    mu=3.5316e12,
+    mass=5.2915158e22,
     rotation_period=21_600,
     atmosphere=USSA1976(altitude_converter=kerbin_to_earth_geopotential),
     soi=84_159_286,
