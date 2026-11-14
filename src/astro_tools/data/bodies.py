@@ -11,6 +11,7 @@ EARTH = CelestialBody(
     radius=6_371_000,
     mass=5.974e24,
     rotation_period=86164.0905,
+    orbital_period=365.256363004 * SECONDS_PER_DAY,
     atmosphere=ExponentialAtmosphere(
         surface_density=1.255, 
         scale_height=8500
@@ -22,6 +23,7 @@ MOON = CelestialBody(
     radius=1_737_000,
     mass=73.48e21,
     rotation_period=27.32 * SECONDS_PER_DAY,
+    orbital_period=27.321661 * SECONDS_PER_DAY,
     atmosphere=None
 )
 
@@ -30,6 +32,7 @@ KERBIN = KSPBody(
     radius=600_000,
     mass=5.2915158e22,
     rotation_period=21_600,
+    orbital_period=9_203_545,
     atmosphere=USSA1976(altitude_converter=kerbin_to_earth_geopotential),
     soi=84_159_286,
     atmosphere_cutoff_altitude=70_000
