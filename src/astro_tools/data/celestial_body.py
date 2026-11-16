@@ -9,6 +9,7 @@ class CelestialBody:
     radius: float
     mass: float
     rotation_period: float | None = None
+    orbital_period: float
     atmosphere: AtmosphereModel | None = None
 
     @property
