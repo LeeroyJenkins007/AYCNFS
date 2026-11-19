@@ -26,6 +26,26 @@ def orbital_velocity(body: CelestialBody, radius: float, a: float | None = None)
     # Elliptical orbit (vis-viva equation)
     return math.sqrt((2*body.mu / radius) - (body.mu / a))
 
+def vis_visa(mu: float, r: float, a: float) -> float:
+    """
+        Calculate the velocity at at position in an orbit.
+    
+        Parameters
+        ----------
+        mu : float
+            Gravitational parameter [m^3/s^2].
+        r : float
+            Distance from body center [m].
+        a : float
+            Semi-Major Axis of orbit [m].
+    
+        Returns
+        -------
+        float
+            Velocity [m/s].
+    """
+    return math.sqrt(mu * (2/r - 1/a))
+
 
 def escape_velocity(body: CelestialBody, radius: float) -> float:
      """
@@ -46,13 +66,13 @@ def escape_velocity(body: CelestialBody, radius: float) -> float:
      return math.sqrt(2 * body.mu / radius)
 
 
-def orbital_period(body: CelestialBody, a: float) -> float:
+def orbital_period(mu: float, a: float) -> float:
     """
     Calculates the orbital period from any closed orbit.
 
     Parameters
     ----------
-    body.mu : float
+    mu : float
         Gravitational parameter [m^3/s^2].
     a : float
         Semi-Major axis of ellipse [m].
@@ -63,5 +83,5 @@ def orbital_period(body: CelestialBody, a: float) -> float:
         Period for one complete orbit [s].
     """
     return 2 * math.pi * math.sqrt(
-        a**3 / body.mu
+        a**3 / mu
     )
