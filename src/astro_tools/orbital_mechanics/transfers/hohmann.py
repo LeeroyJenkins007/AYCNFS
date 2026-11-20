@@ -16,10 +16,11 @@ class HohmannTransfer:
     total_delta_v: float
 
     transfer_time: float
+  
 
 "Classical Hohmann transfer from circular to circular"
 def hohmann_transfer(mu: float, r1: float, r2: float) -> HohmannTransfer:
-    a = hohmann_transfer_semi_major_axis(r1, r2)
+    a = (r1 +  r2)/2
     e = abs(r2-r1) / (r1 + r2)
 
     "Honestly a better way i think is using velocities directly "
@@ -52,7 +53,7 @@ def hohmann_transfer(mu: float, r1: float, r2: float) -> HohmannTransfer:
     )
 
 def hohmann_transfer_semi_major_axis(r1: float, r2: float) -> float:
-    return (r1 + r2)/2
+    return (r1 + r2)/2  
 
 def hohmann_transfer_time(mu: float, radius_1: float, radius_2: float) -> float:
 

@@ -1,1 +1,1 @@
-from .hohmann import hohmann_transfer_time
+from .hohmann import hohmann_transfer, HohmannTransfer

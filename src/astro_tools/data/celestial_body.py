@@ -8,7 +8,8 @@ class CelestialBody:
     name: str
     radius: float
     mass: float
-    orbital_period: float
+    orbital_period: float   # sidereal
+    semi_major_axis: float
     rotation_period: float | None = None
     soi: float | None = None
     atmosphere: AtmosphereModel | None = None
